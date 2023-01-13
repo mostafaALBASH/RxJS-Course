@@ -20,7 +20,7 @@ import { ajax } from 'rxjs/ajax';
 // Get the last word that contains 6 characters
 (function task2(): void {
     // const stream$ = 
-    
+
     // run(stream$);
 })();
 
@@ -30,7 +30,7 @@ import { ajax } from 'rxjs/ajax';
 // EN: Create an observable of document click event. Get the second click event object.
 (function task3(): void {
     // const stream$ = 
-    
+
     // run(stream$, { outputMethod: "console"});
 })();
 
@@ -56,17 +56,17 @@ import { ajax } from 'rxjs/ajax';
         dateStart: "2020-04-13T00:00:00",
         ProjectId: "1",
         ProjectName: "First",
-      },
-      {
+    },
+    {
         dateStart: "2020-07-05T00:00:00",
         ProjectId: "2",
         ProjectName: "Second",
-      },
-      {
+    },
+    {
         dateStart: "2020-06-04T00:00:00",
         ProjectId: "3",
         ProjectName: "Third",
-      }]);
+    }]);
 
     // const stream$ = 
 
@@ -90,9 +90,17 @@ import { ajax } from 'rxjs/ajax';
 // EN: Create an observable of object with two properties: id, name.
 // Get the number of the object in the stream whose name is longer than 10 characters
 (function task7() {
-    // const stream$ = 
+    const stream$ = of(
+        { id: 1, name: 'Jon Snow' },
+        { id: 2, name: 'Mostafa Elbesh' },
+        { id: 3, name: 'Ned Stark' })
+        .pipe(
+            findIndex(
+                obj => obj.name.length > 10
+            )
+        );
 
-    // run(stream$);
+    run(stream$);
 })();
 
 // Task 8. single()
@@ -103,9 +111,15 @@ import { ajax } from 'rxjs/ajax';
 // have the same title values
 // Get the object with title = 'Learn RxJS' if it's the only one object in the stream
 (function task8() {
-    // const stream$ = 
-    
-    // run(stream$);
+    const stream$ = of(
+        { title: 'Learn RxJS', priority: 1 },
+        { title: 'Order Pizza', priority: 2 },
+        { title: 'Watch TV', priority: 3 }
+    ).pipe(
+        single(obj => obj.title === 'Learn RxJS')
+    )
+
+    run(stream$);
 })();
 
 // Task 9. ignoreElements() (Uladzimir Miadzinski)
@@ -130,9 +144,30 @@ import { ajax } from 'rxjs/ajax';
 // Use: ajax, of, mergeWith, tap, catchError, EMPTY
 // Replace the ajax function with of and watch the result
 (function task9() {
-    // const stream$ = 
+    const logoutMain$ = of('https://app.com/logout').pipe(
+        tap(() => console.log('User successfully logged out - main app')),
+        catchError(() => EMPTY)
+    );
 
-    // run(stream$);
+    const logoutSubdomain1$ = of('https://mail.app.com/logout').pipe(
+        tap(() => console.log('User successfully logged out - subdomain 1')),
+        catchError(() => EMPTY)
+    );
+
+    const logoutSubdomain2$ = of('https://research.app.com/logout').pipe(
+        tap(() => console.log('User successfully logged out - subdomain 2')),
+        catchError(() => EMPTY)
+    );
+
+    const stream$ = logoutMain$.pipe(
+        mergeWith(logoutSubdomain1$, logoutSubdomain2$)
+    );
+
+    run(stream$, {
+        next: 'User successfully logged out on all subdomains',
+        error: 'Failed to logout user on all subdomains',
+        complete: 'Complete!'
+    });
 })();
 
-export function runner() {}
+export function runner() { }
